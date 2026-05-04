@@ -1,0 +1,92 @@
+name: ci
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+jobs:
+  ci:
+    needs:
+      - jobs
+      - integration
+      - tag0
+      - tag1
+    runs-on: ubuntu-slim
+    steps:
+      - run: true
+  job0:
+    runs-on: ubuntu-slim
+    steps:
+      - run: |
+          printf 'running %s.\n' "${{ github.job}}"
+
+          true
+  job1:
+    runs-on: ubuntu-slim
+    steps:
+      - run: |
+          printf 'running %s.\n' "${{ github.job}}"
+
+          true
+  jobs:
+    runs-on: ubuntu-slim
+    steps:
+      - run: true
+  integration0:
+    needs: job0
+    runs-on: ubuntu-slim
+    steps:
+      - env:
+          skip: ${{ github.event_name != 'pull_request' }}
+        run: |
+          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+
+          printf 'running %s.\n' "${{ github.job}}"
+  integration1:
+    needs: jobs
+    runs-on: ubuntu-slim
+    steps:
+      - env:
+          skip: ${{ github.event_name != 'pull_request' }}
+        run: |
+          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+
+          printf 'running %s.\n' "${{ github.job}}"
+  integration:
+    needs:
+      - integration0
+      - integration1
+    runs-on: ubuntu-slim
+    steps:
+      - run: true
+  tag0:
+    needs: integration
+    runs-on: ubuntu-slim
+    steps:
+      - env:
+          skip: ${{ github.ref_type != 'tag' }}
+        run: |
+          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+
+          printf 'running %s.\n' "${{ github.job}}"
+  tag1:
+    needs: tag0
+    runs-on: ubuntu-slim
+    steps:
+      - env:
+          skip: ${{ github.ref_type != 'tag' }}
+        run: |
+          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+
+          printf 'running %s.\n' "${{ github.job}}"
