@@ -1,0 +1,90 @@
+# Copyright 2026 RADAR, Inc. - All Rights Reserved
+# Proprietary and confidential
+
+name: ci
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+jobs:
+  ci:
+    if: ${{ !cancelled() }}
+    needs:
+      - job0
+      - job1
+      - integration
+      - tags
+    runs-on: ubuntu-slim
+    steps:
+      - run: |
+          test ${{ !contains(needs.*.result, 'failed') }} = true
+          test ${{ !contains(needs.*.result, 'cancelled') }} = true
+          test ${{ ((github.ref_type != 'tag') || (needs.tags.result == 'success')) }} = true
+  job0:
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 1
+      - run: true
+  job1:
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 2
+      - run: true
+  integration0:
+    if: github.ref_type == 'tag'
+    needs: job1
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 10
+      - run: true
+  integration1:
+    if: github.ref_type == 'tag'
+    needs: job1
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 12
+      - run: true
+  integration:
+    if: always()
+    needs:
+      - integration0
+      - integration1
+    runs-on: ubuntu-slim
+    steps:
+      - run: |
+          test ${{ !contains(needs.*.result, 'failed') }} = true
+          test ${{ !contains(needs.*.result, 'cancelled') }} = true
+  tag0:
+    if: github.ref_type == 'tag'
+    needs: integration
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 1
+  tag1:
+    if: github.ref_type == 'tag'
+    needs: tag0
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 5
+  tags:
+    if: always()
+    needs:
+      - tag0
+      - tag1
+    runs-on: ubuntu-slim
+    steps:
+      - run: |
+          test ${{ !contains(needs.*.result, 'failed') }} = true
+          test ${{ !contains(needs.*.result, 'cancelled') }} = true
