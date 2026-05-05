@@ -43,7 +43,7 @@ jobs:
   job0:
     runs-on: ubuntu-slim
     steps:
-      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}" && false
   job1:
     runs-on: ubuntu-slim
     steps:
