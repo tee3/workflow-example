@@ -64,7 +64,7 @@ jobs:
       - if: github.ref_type != 'tag'
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
       - if: github.ref_type == 'tag'
-        run: printf '::notice::running %s.\n' "${{ github.job}}"
+        run: printf '::notice::running %s.\n' "${{ github.job}}" && false
   tag1:
     needs: tag0
     runs-on: ubuntu-slim
