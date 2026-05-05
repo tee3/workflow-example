@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - run: sleep 2
-      - run: true
+      - run: fail
   integration0:
     if: github.ref_type == 'tag'
     needs: job1
