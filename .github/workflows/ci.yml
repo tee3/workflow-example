@@ -81,7 +81,7 @@ jobs:
       - if: ${{ fromJSON(needs.plan.outputs.skip-release) }}
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
       - if: ${{ !fromJSON(needs.plan.outputs.skip-release) }}
-        run: printf '::notice::running %s.\n' "${{ github.job}}"
+        run: printf '::notice::running %s.\n' "${{ github.job}}" && false
   tag1:
     needs:
       - plan
