@@ -24,18 +24,15 @@ jobs:
       - tag1
     runs-on: ubuntu-slim
     steps:
-      - run: |
-          printf 'running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   job0:
     runs-on: ubuntu-slim
     steps:
-      - run: |
-          printf 'running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   job1:
     runs-on: ubuntu-slim
     steps:
-      - run: |
-          printf 'running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   jobs:
     needs:
       - job0
@@ -52,7 +49,7 @@ jobs:
         run: |
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
-          printf 'running %s.\n' "${{ github.job}}"
+          printf '::notice::running %s.\n' "${{ github.job}}"
   integration1:
     needs: jobs
     runs-on: ubuntu-slim
@@ -62,7 +59,7 @@ jobs:
         run: |
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
-          printf 'running %s.\n' "${{ github.job}}"
+          printf '::notice::running %s.\n' "${{ github.job}}"
   integration:
     needs:
       - integration0
@@ -79,7 +76,7 @@ jobs:
         run: |
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
-          printf 'running %s.\n' "${{ github.job}}"
+          printf '::notice::running %s.\n' "${{ github.job}}"
   tag1:
     needs: tag0
     runs-on: ubuntu-slim
@@ -89,4 +86,4 @@ jobs:
         run: |
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
-          printf 'running %s.\n' "${{ github.job}}"
+          printf '::notice::running %s.\n' "${{ github.job}}"
