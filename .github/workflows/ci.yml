@@ -40,50 +40,35 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - run: true
-  integration0:
-    needs: job0
-    runs-on: ubuntu-slim
-    steps:
-      - env:
-          skip: ${{ github.event_name != 'pull_request' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
-  integration1:
-    needs: jobs
-    runs-on: ubuntu-slim
-    steps:
-      - env:
-          skip: ${{ github.event_name != 'pull_request' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
   integration:
+    if: github.event_name == 'pull_request'
     needs:
       - integration0
       - integration1
     runs-on: ubuntu-slim
     steps:
-      - run: true
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+  integration0:
+    if: github.event_name == 'pull_request'
+    needs: job0
+    runs-on: ubuntu-slim
+    steps:
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+  integration1:
+    if: github.event_name == 'pull_request'
+    needs: jobs
+    runs-on: ubuntu-slim
+    steps:
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   tag0:
+    if: github.ref_type == 'tag'
     needs: integration
     runs-on: ubuntu-slim
     steps:
-      - env:
-          skip: ${{ github.ref_type != 'tag' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   tag1:
+    if: github.ref_type == 'tag'
     needs: tag0
     runs-on: ubuntu-slim
     steps:
-      - env:
-          skip: ${{ github.ref_type != 'tag' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
