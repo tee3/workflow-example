@@ -42,7 +42,7 @@ jobs:
       - if: github.event_name != 'pull_request'
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
       - if: github.event_name == 'pull_request'
-        run: printf '::notice::running %s.\n' "${{ github.job}}"
+        run: printf '::notice::running %s.\n' "${{ github.job}}" && false
   integration1:
     needs:
       - job0
