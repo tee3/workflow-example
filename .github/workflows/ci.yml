@@ -41,23 +41,25 @@ jobs:
     steps:
       - run: true
   integration0:
+    if: github.event_name != 'pull_request'
     needs: job0
     runs-on: ubuntu-slim
     steps:
       - env:
           skip: ${{ github.event_name != 'pull_request' }}
         run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+          # [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
   integration1:
+    if: github.event_name != 'pull_request'
     needs: jobs
     runs-on: ubuntu-slim
     steps:
       - env:
           skip: ${{ github.event_name != 'pull_request' }}
         run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+          # [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
   integration:
@@ -68,22 +70,24 @@ jobs:
     steps:
       - run: true
   tag0:
+    if: github.ref_type != 'tag'
     needs: integration
     runs-on: ubuntu-slim
     steps:
       - env:
           skip: ${{ github.ref_type != 'tag' }}
         run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+          # [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
   tag1:
+    if: github.ref_type != 'tag'
     needs: tag0
     runs-on: ubuntu-slim
     steps:
       - env:
           skip: ${{ github.ref_type != 'tag' }}
         run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
+          # [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
