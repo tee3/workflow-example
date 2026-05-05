@@ -33,7 +33,7 @@ jobs:
       - run: |
           printf 'running %s.\n' "${{ github.job}}"
 
-          true
+          false
   job1:
     runs-on: ubuntu-slim
     steps:
