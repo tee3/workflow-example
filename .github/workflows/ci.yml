@@ -50,6 +50,8 @@ jobs:
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
+
+          false
   integration1:
     needs: jobs
     runs-on: ubuntu-slim
