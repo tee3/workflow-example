@@ -16,6 +16,19 @@ concurrency:
 permissions:
   contents: read
 jobs:
+  plan:
+    outputs:
+      skip-integration: ${{ steps.generate.outputs.skip-integration }}
+      skip-release: ${{ steps.generate.outputs.skip-release }}
+    runs-on: ubuntu-slim
+    steps:
+      - id: generate
+        env:
+          skip_integration: ${{ github.event_name == 'pull_request' }}
+          skip_release: ${{ github.ref_type != 'tag' }}
+        run: |
+          printf 'skip-integration=%s\n' "${skip_integration}" >> "${GITHUB_OUTPUT}"
+          printf 'skip-release=%s\n' "${skip_release}" >> "${GITHUB_OUTPUT}"
   ci:
     needs:
       - job0
@@ -36,40 +49,46 @@ jobs:
     steps:
       - run: printf '::notice::running %s.\n' "${{ github.job}}"
   integration0:
-    needs: job0
+    needs:
+      - plan
+      - job0
     runs-on: ubuntu-slim
     steps:
-      - if: github.event_name != 'pull_request'
+      - if: ${{ fromJSON(needs.plan.outputs.skip-integration) }}
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
-      - if: github.event_name == 'pull_request'
+      - if: ${{ !fromJSON(needs.plan.outputs.skip-integration) }}
         run: printf '::notice::running %s.\n' "${{ github.job}}"
   integration1:
     needs:
+      - plan
       - job0
       - job1
     runs-on: ubuntu-slim
     steps:
-      - if: github.event_name != 'pull_request'
+      - if: ${{ fromJSON(needs.plan.outputs.skip-integration) }}
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
-      - if: github.event_name == 'pull_request'
+      - if: ${{ !fromJSON(needs.plan.outputs.skip-integration) }}
         run: printf '::notice::running %s.\n' "${{ github.job}}"
   tag0:
     needs:
+      - plan
       - job0
       - job1
       - integration0
       - integration1
     runs-on: ubuntu-slim
     steps:
-      - if: github.ref_type != 'tag'
+      - if: ${{ fromJSON(needs.plan.outputs.skip-release) }}
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
-      - if: github.ref_type == 'tag'
+      - if: ${{ !fromJSON(needs.plan.outputs.skip-release) }}
         run: printf '::notice::running %s.\n' "${{ github.job}}"
   tag1:
-    needs: tag0
+    needs:
+      - plan
+      - tag0
     runs-on: ubuntu-slim
     steps:
-      - if: github.ref_type != 'tag'
+      - if: ${{ fromJSON(needs.plan.outputs.skip-release) }}
         run: printf '::notice::skipped %s.\n' "${{ github.job}}"
-      - if: github.ref_type == 'tag'
+      - if: ${{ !fromJSON(needs.plan.outputs.skip-release) }}
         run: printf '::notice::running %s.\n' "${{ github.job}}"
