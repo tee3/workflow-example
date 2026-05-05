@@ -63,6 +63,8 @@ jobs:
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf 'running %s.\n' "${{ github.job}}"
+
+          false
   integration:
     needs:
       - integration0
