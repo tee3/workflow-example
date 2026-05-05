@@ -17,14 +17,30 @@ permissions:
   contents: read
 jobs:
   ci:
+    if: always() && !cancelled()
     needs:
-      - jobs
-      - integration
+      - job0
+      - job1
+      - integration0
+      - integration1
       - tag0
       - tag1
     runs-on: ubuntu-slim
     steps:
-      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+      - env:
+          integration0_ok: ${{ github.event_name == 'pull_request' && needs.integration0.result == 'success' || needs.integration0.result == 'skipped' }}
+          integration1_ok: ${{ github.event_name == 'pull_request' && needs.integration1.result == 'success' || needs.integration1.result == 'skipped' }}
+          tag0_ok: ${{ github.ref_type == 'tag' && needs.tag0.result == 'success' || needs.tag0.result == 'skipped '}}
+          tag1_ok: ${{ github.ref_type == 'tag' && needs.tag1.result == 'success' || needs.tag1.result == 'skipped '}}
+        run: |
+          printf '::notice::running %s.\n' "${{ github.job}}"
+
+          set -x
+
+          test "${integration0_ok}" = true
+          test "${integration1_ok}" = true
+          test "${tag0_ok}" = true
+          test "${tag1_ok}" = true
   job0:
     runs-on: ubuntu-slim
     steps:
@@ -33,57 +49,33 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - run: printf '::notice::running %s.\n' "${{ github.job}}"
-  jobs:
+  integration0:
+    if: github.event_name == 'pull_request'
+    needs: job0
+    runs-on: ubuntu-slim
+    steps:
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+  integration1:
+    if: github.event_name == 'pull_request'
     needs:
       - job0
       - job1
     runs-on: ubuntu-slim
     steps:
-      - run: true
-  integration0:
-    needs: job0
-    runs-on: ubuntu-slim
-    steps:
-      - env:
-          skip: ${{ github.event_name != 'pull_request' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
-  integration1:
-    needs: jobs
-    runs-on: ubuntu-slim
-    steps:
-      - env:
-          skip: ${{ github.event_name != 'pull_request' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
-  integration:
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
+  tag0:
+    if: github.ref_type == 'tag'
     needs:
+      - job0
+      - job1
       - integration0
       - integration1
     runs-on: ubuntu-slim
     steps:
-      - run: true
-  tag0:
-    needs: integration
-    runs-on: ubuntu-slim
-    steps:
-      - env:
-          skip: ${{ github.ref_type != 'tag' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
   tag1:
+    if: github.ref_type == 'tag'
     needs: tag0
     runs-on: ubuntu-slim
     steps:
-      - env:
-          skip: ${{ github.ref_type != 'tag' }}
-        run: |
-          [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
-
-          printf '::notice::running %s.\n' "${{ github.job}}"
+      - run: printf '::notice::running %s.\n' "${{ github.job}}"
