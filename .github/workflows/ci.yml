@@ -37,6 +37,9 @@ jobs:
       - run: |
           printf 'running %s.\n' "${{ github.job}}"
   jobs:
+    needs:
+      - job0
+      - job1
     runs-on: ubuntu-slim
     steps:
       - run: true
