@@ -77,6 +77,8 @@ jobs:
           [ "${skip}" = true ] && { printf '::notice::skipped.\n' 1>&2 ; exit 0 ; }
 
           printf '::notice::running %s.\n' "${{ github.job}}"
+
+          false
   tag1:
     needs: tag0
     runs-on: ubuntu-slim
